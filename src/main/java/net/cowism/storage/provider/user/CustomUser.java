@@ -13,27 +13,27 @@ import org.keycloak.storage.adapter.AbstractUserAdapter;
 
 
 class CustomUser extends AbstractUserAdapter {
-    
+
     private final String username;
     private final String email;
     private final String firstName;
     private final String lastName;
-    private final Date birthDate;
+    private final Boolean acctLocked;
 
     private CustomUser(KeycloakSession session, RealmModel realm,
-      ComponentModel storageProviderModel,
-      String username,
-      String email,
-      String firstName,
-      String lastName,
-      Date birthDate ) {
+                       ComponentModel storageProviderModel,
+                       String username,
+                       String email,
+                       String firstName,
+                       String lastName,
+                       Boolean acctLocked ) {
         super(session, realm, storageProviderModel);
         this.username = username;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.birthDate = birthDate;
-        
+        this.acctLocked = acctLocked;
+
     }
 
     @Override
@@ -56,10 +56,10 @@ class CustomUser extends AbstractUserAdapter {
         return email;
     }
 
-    public Date getBirthDate() {
-        return birthDate;
+    public Boolean getAcctLocked() {
+        return acctLocked;
     }
-    
+
     @Override
     public Map<String, List<String>> getAttributes() {
         MultivaluedHashMap<String, String> attributes = new MultivaluedHashMap<>();
@@ -67,7 +67,7 @@ class CustomUser extends AbstractUserAdapter {
         attributes.add(UserModel.EMAIL,getEmail());
         attributes.add(UserModel.FIRST_NAME,getFirstName());
         attributes.add(UserModel.LAST_NAME,getLastName());
-        attributes.add("birthDate",getBirthDate().toString());
+        attributes.add("acctLocked",getAcctLocked().toString());
         return attributes;
     }
 
@@ -79,46 +79,46 @@ class CustomUser extends AbstractUserAdapter {
         private String email;
         private String firstName;
         private String lastName;
-        private Date birthDate;
-        
+        private Boolean acctLocked;
+
         Builder(KeycloakSession session, RealmModel realm, ComponentModel storageProviderModel,String username) {
             this.session = session;
             this.realm = realm;
             this.storageProviderModel = storageProviderModel;
             this.username = username;
         }
-        
+
         CustomUser.Builder email(String email) {
             this.email = email;
             return this;
         }
-        
+
         CustomUser.Builder firstName(String firstName) {
             this.firstName = firstName;
             return this;
         }
-        
+
         CustomUser.Builder lastName(String lastName) {
             this.lastName = lastName;
             return this;
         }
-        
-        CustomUser.Builder birthDate(Date birthDate) {
-            this.birthDate = birthDate;
+
+        CustomUser.Builder acctLocked(Boolean acctLocked) {
+            this.acctLocked = acctLocked;
             return this;
         }
-        
+
         CustomUser build() {
             return new CustomUser(
-              session,
-              realm,
-              storageProviderModel,
-              username,
-              email,
-              firstName,
-              lastName,
-              birthDate);
-            
+                    session,
+                    realm,
+                    storageProviderModel,
+                    username,
+                    email,
+                    firstName,
+                    lastName,
+                    acctLocked);
+
         }
     }
 }

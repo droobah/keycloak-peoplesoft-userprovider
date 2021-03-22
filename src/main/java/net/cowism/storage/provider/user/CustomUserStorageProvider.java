@@ -117,7 +117,10 @@ public class CustomUserStorageProvider implements UserStorageProvider,
         if( !this.supportsCredentialType(credentialInput.getType())) {
             return false;
         }
-        StorageId sid = new StorageId(user.getId());
+
+        log.info("[I59] Password checking is not implemented yet");
+        return false; // credential checking isn't available yet
+        /*StorageId sid = new StorageId(user.getId());
         String username = sid.getExternalId();
         
         try ( Connection c = DbUtil.getConnection(this.model)) {
@@ -135,7 +138,7 @@ public class CustomUserStorageProvider implements UserStorageProvider,
         }
         catch(SQLException ex) {
             throw new RuntimeException("Database error:" + ex.getMessage(),ex);
-        }
+        }*/
     }
 
     // UserQueryProvider implementation
@@ -145,7 +148,7 @@ public class CustomUserStorageProvider implements UserStorageProvider,
         log.info("[I93] getUsersCount: realm={}", realm.getName() );
         try ( Connection c = DbUtil.getConnection(this.model)) {
             Statement st = c.createStatement();
-            st.execute("select count(*) from users");
+            st.execute("select count(*) from PSOPRDEFN A left outer join PS_NAMES B on A.EMPLID = B.EMPLID where ISNUMERIC(A.OPRID) = 1 and (B.EFFDT IS NULL or B.EFFDT = (select MAX(EFFDT) from PS_NAMES Z where Z.EMPLID = B.EMPLID)) order by UserName");
             ResultSet rs = st.getResultSet();
             rs.next();
             return rs.getInt(1);
@@ -165,7 +168,7 @@ public class CustomUserStorageProvider implements UserStorageProvider,
         log.info("[I113] getUsers: realm={}", realm.getName());
         
         try ( Connection c = DbUtil.getConnection(this.model)) {
-            PreparedStatement st = c.prepareStatement("select username, firstName,lastName, email, birthDate from users order by username limit ? offset ?");
+            PreparedStatement st = c.prepareStatement("select FirstName=RTRIM(ISNULL(FIRST_NAME,SUBSTRING(A.OPRDEFNDESC,0,CHARINDEX(' ',A.OPRDEFNDESC)))), LastName=LTRIM(ISNULL(LAST_NAME,SUBSTRING(A.OPRDEFNDESC,CHARINDEX(' ',A.OPRDEFNDESC),LEN(A.OPRDEFNDESC)))), UserName=A.OPRID, Email=A.EMAILID, AcctLocked=A.ACCTLOCK from PSOPRDEFN A left outer join PS_NAMES B on A.EMPLID = B.EMPLID where ISNUMERIC(A.OPRID) = 1 and (B.EFFDT IS NULL or B.EFFDT = (select MAX(EFFDT) from PS_NAMES Z where Z.EMPLID = B.EMPLID)) order by UserName offset ? rows fetch next ? rows only");
             st.setInt(1, maxResults);
             st.setInt(2, firstResult);
             st.execute();
@@ -191,7 +194,7 @@ public class CustomUserStorageProvider implements UserStorageProvider,
         log.info("[I139] searchForUser: realm={}", realm.getName());
         
         try ( Connection c = DbUtil.getConnection(this.model)) {
-            PreparedStatement st = c.prepareStatement("select username, firstName,lastName, email, birthDate from users where username like ? order by username limit ? offset ?");
+            PreparedStatement st = c.prepareStatement("select FirstName=RTRIM(ISNULL(FIRST_NAME,SUBSTRING(A.OPRDEFNDESC,0,CHARINDEX(' ',A.OPRDEFNDESC)))), LastName=LTRIM(ISNULL(LAST_NAME,SUBSTRING(A.OPRDEFNDESC,CHARINDEX(' ',A.OPRDEFNDESC),LEN(A.OPRDEFNDESC)))), UserName=A.OPRID, Email=A.EMAILID, AcctLocked=A.ACCTLOCK from PSOPRDEFN A left outer join PS_NAMES B on A.EMPLID = B.EMPLID where ISNUMERIC(A.OPRID) = 1 and (B.EFFDT IS NULL or B.EFFDT = (select MAX(EFFDT) from PS_NAMES Z where Z.EMPLID = B.EMPLID)) and UserName like ? order by UserName offset ? rows fetch next ? rows only");
             st.setString(1, search);
             st.setInt(2, maxResults);
             st.setInt(3, firstResult);
@@ -236,13 +239,11 @@ public class CustomUserStorageProvider implements UserStorageProvider,
     
     //------------------- Implementation 
     private UserModel mapUser(RealmModel realm, ResultSet rs) throws SQLException {
-        
-        DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-        CustomUser user = new CustomUser.Builder(ksession, realm, model, rs.getString("username"))
-          .email(rs.getString("email"))
-          .firstName(rs.getString("firstName"))
-          .lastName(rs.getString("lastName"))
-          .birthDate(rs.getDate("birthDate"))
+        CustomUser user = new CustomUser.Builder(ksession, realm, model, rs.getString("UserName"))
+          .email(rs.getString("Email"))
+          .firstName(rs.getString("FirstName"))
+          .lastName(rs.getString("LastName"))
+          .acctLocked(rs.getBoolean("AcctLocked"))
           .build();
         
         return user;
