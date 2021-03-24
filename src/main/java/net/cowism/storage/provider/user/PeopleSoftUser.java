@@ -1,6 +1,5 @@
 package net.cowism.storage.provider.user;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +11,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.storage.adapter.AbstractUserAdapter;
 
 
-class CustomUser extends AbstractUserAdapter {
+class PeopleSoftUser extends AbstractUserAdapter {
 
     private final String username;
     private final String email;
@@ -20,13 +19,13 @@ class CustomUser extends AbstractUserAdapter {
     private final String lastName;
     private final Boolean acctLocked;
 
-    private CustomUser(KeycloakSession session, RealmModel realm,
-                       ComponentModel storageProviderModel,
-                       String username,
-                       String email,
-                       String firstName,
-                       String lastName,
-                       Boolean acctLocked ) {
+    private PeopleSoftUser(KeycloakSession session, RealmModel realm,
+                           ComponentModel storageProviderModel,
+                           String username,
+                           String email,
+                           String firstName,
+                           String lastName,
+                           Boolean acctLocked ) {
         super(session, realm, storageProviderModel);
         this.username = username;
         this.email = email;
@@ -88,28 +87,28 @@ class CustomUser extends AbstractUserAdapter {
             this.username = username;
         }
 
-        CustomUser.Builder email(String email) {
+        PeopleSoftUser.Builder email(String email) {
             this.email = email;
             return this;
         }
 
-        CustomUser.Builder firstName(String firstName) {
+        PeopleSoftUser.Builder firstName(String firstName) {
             this.firstName = firstName;
             return this;
         }
 
-        CustomUser.Builder lastName(String lastName) {
+        PeopleSoftUser.Builder lastName(String lastName) {
             this.lastName = lastName;
             return this;
         }
 
-        CustomUser.Builder acctLocked(Boolean acctLocked) {
+        PeopleSoftUser.Builder acctLocked(Boolean acctLocked) {
             this.acctLocked = acctLocked;
             return this;
         }
 
-        CustomUser build() {
-            return new CustomUser(
+        PeopleSoftUser build() {
+            return new PeopleSoftUser(
                     session,
                     realm,
                     storageProviderModel,

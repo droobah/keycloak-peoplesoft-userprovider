@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import org.keycloak.component.ComponentModel;
-import static net.cowism.storage.provider.user.CustomUserStorageProviderConstants.*;
+import static net.cowism.storage.provider.user.PeopleSoftUserStorageProviderConstants.*;
 
 public class DbUtil {
 

@@ -1,1 +1,1 @@
-net.cowism.storage.provider.user.CustomUserStorageProviderFactory
+net.cowism.storage.provider.user.PeopleSoftUserStorageProviderFactory
